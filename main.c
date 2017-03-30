@@ -10,7 +10,7 @@ int main(){
 	telaDeFundo = IMG_LoadTexture(renderizador, "intro.png");
 	SDL_RenderCopy(renderizador, telaDeFundo, NULL, NULL);
 	SDL_RenderPresent(renderizador);
-	SDL_Delay(1000);
+	SDL_Delay(5000);
 	SDL_DestroyTexture(telaDeFundo);
 	SDL_DestroyRenderer(renderizador);
 	SDL_DestroyWindow(janela);

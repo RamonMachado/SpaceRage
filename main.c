@@ -11,5 +11,8 @@ int main(){
 	SDL_RenderCopy(renderizador, telaDeFundo, NULL, NULL);
 	SDL_RenderPresent(renderizador);
 	SDL_Delay(1000);
+	SDL_DestroyTexture(telaDeFundo);
+	SDL_DestroyRenderer(renderizador);
+	SDL_DestroyWindow(janela);
 	return 0;
 }

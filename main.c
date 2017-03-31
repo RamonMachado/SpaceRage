@@ -29,9 +29,9 @@ int main(){
 	p1Rect.h = 32;
 	janela = SDL_CreateWindow("Space Rage", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, SDL_WINDOW_FULLSCREEN);
 	renderizador = SDL_CreateRenderer(janela, -1, SDL_RENDERER_ACCELERATED);
-	telaDeFundo = IMG_LoadTexture(renderizador, "intro.png");
-	logo = IMG_LoadTexture(renderizador, "sp.png");
-	p1 = IMG_LoadTexture(renderizador, "p1basic.png");
+	telaDeFundo = IMG_LoadTexture(renderizador, "assets/intro/intro.png");
+	logo = IMG_LoadTexture(renderizador, "assets/menu/sp.png");
+	p1 = IMG_LoadTexture(renderizador, "assets/ships/p1basic.png");
 	SDL_RenderCopy(renderizador, telaDeFundo, NULL, NULL);
 	SDL_RenderPresent(renderizador);
 	SDL_Delay(1000);

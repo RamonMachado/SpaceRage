@@ -1,19 +1,43 @@
 #include <stdio.h>
+#include <stdbool.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <math.h>
 
-#define degreesToRadians(angleDegrees) (angleDegrees * M_PI / 180.0)
+#define deg2rad(angleDegrees) (angleDegrees * M_PI / 180.0)
+#define rad2deg(rad) (rad * (180/M_PI))
+
+typedef enum {
+	KEY_W,
+	KEY_S,
+	KEY_D,
+	KEY_A
+} keys;
 
 void controlesjogo();
-	int rodando = 1;
-	double angulo = 0;
-	double p1Vel = 0;
-	SDL_Event event;
-int main(){
-	
+void sys_update();
+bool sys_getkeystate(keys key);
+
+typedef struct {
+	float x, y;
+} vec2;
+
+int rodando = 1;
+SDL_Event event;
+static SDL_Renderer *renderizador;
+
+vec2 sum(vec2 a, vec2 b)
+{
+	vec2 ret = {
+		a.x + b.x,
+		a.y + b.y
+	};
+
+	return ret;
+}
+
+int main(void) {	
 	SDL_Window * janela;
-	SDL_Renderer * renderizador;
 	SDL_Texture * telaDeFundo;
 	SDL_Texture * logo;
 	SDL_Rect logoRect;
@@ -27,78 +51,27 @@ int main(){
 	p1Rect.y = 360.0;
 	p1Rect.w = 32;
 	p1Rect.h = 32;
-	janela = SDL_CreateWindow("Space Rage", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, SDL_WINDOW_FULLSCREEN);
+	janela = SDL_CreateWindow("Space Rage", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, SDL_WINDOW_FULLSCREEN_DESKTOP);
 	renderizador = SDL_CreateRenderer(janela, -1, SDL_RENDERER_ACCELERATED);
-	telaDeFundo = IMG_LoadTexture(renderizador, "assets/intro/intro.png");
-	logo = IMG_LoadTexture(renderizador, "assets/menu/sp.png");
-	p1 = IMG_LoadTexture(renderizador, "assets/ships/p1basic.png");
+	telaDeFundo = IMG_LoadTexture(renderizador, "intro.png");
+	logo = IMG_LoadTexture(renderizador, "sp.png");
+
+	game_init();
+	
+
 	SDL_RenderCopy(renderizador, telaDeFundo, NULL, NULL);
 	SDL_RenderPresent(renderizador);
-	SDL_Delay(1000);
+	//SDL_Delay(1000);
 	SDL_RenderCopy(renderizador, logo, NULL, &logoRect);
 	SDL_RenderPresent(renderizador);
-	SDL_Delay(3000);
+	//SDL_Delay(3000);
 	while(rodando == 1){
-		controlesjogo();
+		sys_update();
 		SDL_RenderClear(renderizador);
-		/*p1Rect.x += (cos(degreesToRadians(angulo))*p1Vel);
-		printf("p1rect.x: %d\n", p1Rect.x);
-		p1Rect.y += (sin(degreesToRadians(angulo))*p1Vel);*/
-		if(angulo == 0){
-			p1Rect.x += p1Vel;
-		}
-		if(angulo == 45){
-			p1Rect.x += p1Vel;
-			p1Rect.y += p1Vel;
-		}
-		if(angulo == -45){
-			p1Rect.x += p1Vel;
-			p1Rect.y -= p1Vel;
-		}
-		if(angulo == 90){
-			p1Rect.y += p1Vel;
-		}
-		if(angulo == -90){
-			p1Rect.y -= p1Vel;
-		}
-		if(angulo == 135){
-			p1Rect.x -= p1Vel;
-			p1Rect.y += p1Vel;
-		}
-		if(angulo == -135){
-			p1Rect.x -= p1Vel;
-			p1Rect.y -= p1Vel;
-		}
-		if(angulo == 180){
-			p1Rect.x -= p1Vel;
-		}
-		if(angulo == -180){
-			p1Rect.x -= p1Vel;
-		}
-		if(angulo == 225){
-			p1Rect.x -= p1Vel;
-			p1Rect.y -= p1Vel;
-		}
-		if(angulo == -225){
-			p1Rect.x -= p1Vel;
-			p1Rect.y += p1Vel;
-		}
-		if(angulo == 270){
-			p1Rect.y -= p1Vel;
-		}
-		if(angulo == -270){
-			p1Rect.y += p1Vel;
-		}
-		if(angulo == 315){
-			p1Rect.x += p1Vel;
-			p1Rect.y -= p1Vel;
-		}
-		if(angulo == -315){
-			p1Rect.x += p1Vel;
-			p1Rect.y += p1Vel;
-		}
-		printf("p1rect.y: %d\n", p1Rect.y);
-		SDL_RenderCopyEx(renderizador, p1, NULL, &p1Rect, angulo, NULL, SDL_FLIP_VERTICAL);
+
+		game_update();
+
+		game_draw();
 		SDL_RenderPresent(renderizador);
 		SDL_Delay(1000/60);
 	}
@@ -109,35 +82,34 @@ int main(){
 	return 0;
 }
 
-void controlesjogo(){
+bool keyarray[sizeof(keys) + 1];
+
+bool sys_getkeystate(keys key)
+{
+	return keyarray[key];
+}
+
+void sys_update(void) {
 	while(SDL_PollEvent(&event)){
-		if(event.type == SDL_QUIT){
+		if (event.type == SDL_QUIT) {
 				rodando = 0;
 		}
-		if(event.type == SDL_KEYDOWN){
-			switch (event.key.keysym.sym){
+		if (event.type == SDL_KEYDOWN) {
+			switch (event.key.keysym.sym) {
 				case SDLK_w:
-					p1Vel+=2;
+					keyarray[KEY_W] = true;
 					break;
 
 				case SDLK_d:
-					angulo-=45;
-					if(angulo == 360 || angulo == -360)
-						angulo = 0;
-					printf("d\n");
-					printf("angulo: %f\n", angulo);
+					keyarray[KEY_D] = true;
 					break;
 
 				case SDLK_a:
-					angulo+=45;
-					if(angulo == 360 || angulo == -360)
-						angulo = 0;	
-					printf("a\n");
-					printf("angulo: %f\n", angulo);
+					keyarray[KEY_A] = true;
 					break;
 
 				case SDLK_s:
-					p1Vel-=2;
+					keyarray[KEY_S] = true;
 					break;
 
 				case SDLK_ESCAPE:
@@ -145,5 +117,30 @@ void controlesjogo(){
 					break;
 			}
 		}
+
+		if (event.type == SDL_KEYUP) {
+			switch (event.key.keysym.sym) {
+				case SDLK_w:
+					keyarray[KEY_W] = false;
+					break;
+
+				case SDLK_d:
+					keyarray[KEY_D] = false;
+					break;
+
+				case SDLK_a:
+					keyarray[KEY_A] = false;
+					break;
+
+				case SDLK_s:
+					keyarray[KEY_S] = false;
+					break;
+			}
+		}
 	}
+}
+
+SDL_Renderer* sys_get_renderer(void)
+{
+	return renderizador;
 }
